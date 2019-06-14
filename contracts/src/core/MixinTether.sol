@@ -73,8 +73,9 @@ contract MixinTether is
         _assertOptionIdMatchesOption(leftOptionId, leftOption);
         _assertOptionIdMatchesOption(rightOptionId, rightOption);
         _assertOptionsAreTethered(leftOptionId, rightOptionId);
+
         require(
-           (_isOptionOpen(leftOptionId, leftOption) || _isOptionOpen(rightOptionId, rightOption)) && !_isOptionFullyCollateralized(rightOptionId, rightOption),
+           !_isOptionOpen(rightOptionId, rightOption) || _isOptionFullyCollateralized(rightOptionId, rightOption),
             "ONE_OR_BOTH_OPTIONS_ARE_STILL_OPEN_AND_UNCOLLATERALIZED"
         );
 

@@ -431,7 +431,7 @@ contract OptionTokenTest {
     }
 
     function testUnsuccessfulMarginCall() external {
-         // create an option
+        // create an option
         LibOption.Option memory nakedOption = LibOption.Option({
             optionType: LibOption.OptionType.EUROPEAN_PUT,
             makerAsset: LibAsset.AssetType.USDC,
@@ -460,6 +460,107 @@ contract OptionTokenTest {
     }
 
     function testSyntheticLong() external {
-        
+        // record initial balances
+        uint256 initMakerBalanceWeth = wethToken.balanceOf(address(this));
+        uint256 initMakerBalanceUsdc = usdcToken.balanceOf(address(this));
+        uint256 initTakerBalanceWeth = wethToken.balanceOf(address(counterParty));
+        uint256 initTakerBalanceUsdc = usdcToken.balanceOf(address(counterParty));
+
+        // create a naked put option
+        LibOption.Option memory callOption = LibOption.Option({
+            optionType: LibOption.OptionType.AMERICAN_CALL,
+            makerAsset: LibAsset.AssetType.WETH,
+            takerAsset: LibAsset.AssetType.USDC,
+            makerAmount: LibAsset._toBaseUnit(1),
+            takerAmount: LibAsset._toBaseUnit(200),
+            expirationTimeInSeconds: block.timestamp + 10000
+        });
+
+        // create a naked put option
+        LibOption.Option memory putOption = LibOption.Option({
+            optionType: LibOption.OptionType.EUROPEAN_PUT,
+            makerAsset: LibAsset.AssetType.USDC,
+            takerAsset: LibAsset.AssetType.WETH,
+            makerAmount: LibAsset._toBaseUnit(200),
+            takerAmount: LibAsset._toBaseUnit(1),
+            expirationTimeInSeconds: block.timestamp + 10000
+        });
+
+        // tokenize 'em!
+        (bytes32 callOptionId,, bytes32 callTakerTokenId) = optionToken.tokenize(callOption);
+        (bytes32 putOptionId, bytes32 putMakerTokenId,) = optionToken.tokenize(putOption);
+
+        // collateralize the call
+        optionToken.collateralize(callOptionId, callOption, callOption.makerAmount);
+
+        // tether options
+        optionToken.tether(callOptionId, callOption, putOptionId, putOption);
+
+        // give the taker token to our counterparty
+        optionToken.transferFrom(
+            address(this),
+            address(counterParty),
+            uint256(callTakerTokenId | putMakerTokenId)
+        );
+        require(
+            optionToken.getTokenOwner(callTakerTokenId) == address(counterParty),
+            "CALL_TAKER_TOKEN_NOT_OWNED_BY_COUNTERPARTY"
+        );
+        require(
+            optionToken.getTokenOwner(putMakerTokenId) == address(counterParty),
+            "PUT_MAKER_TOKEN_NOT_OWNED_BY_COUNTERPARTY"
+        );
+
+        // Let's pump that price to entice the taker to byte!
+        oracle.setPrice(500);
+
+        // Counterparty now wishes to cash out; they initiate by fully collateralizing the put option.
+        counterParty.collateralize(putOptionId, putOption, putOption.makerAmount);
+     
+        // Now both options are collateralized and can be untethered
+        optionToken.untether(callOptionId, callOption, putOptionId, putOption);
+
+        // the counterparty can now exercise the call option for the epic gains
+        counterParty.exercise(callOptionId, callOption);
+
+        // The issuer (me) can now choose to fill the put option or re-sell their position to someone else
+        // Let's suppose they don't mind about the ETH price and just want to even out their balances, so they exercise.
+        optionToken.exercise(putOptionId, putOption);
+
+         // both options should be closed
+        require(
+            !optionToken.isOpen(putOptionId, putOption),
+            "CALL_OPTION_SHOULD_BE_CLOSED"
+        );
+        require(
+            !optionToken.isOpen(callOptionId, callOption),
+            "PUT_OPTION_SHOULD_BE_CLOSED"
+        );
+
+        // get final balances
+        uint256 finalMakerBalanceWeth = wethToken.balanceOf(address(this));
+        uint256 finalMakerBalanceUsdc = usdcToken.balanceOf(address(this));
+        uint256 finalTakerBalanceWeth = wethToken.balanceOf(address(counterParty));
+        uint256 finalTakerBalanceUsdc = usdcToken.balanceOf(address(counterParty));
+
+        // check balances
+        // the maker earned no profit
+        require(
+            initMakerBalanceWeth - finalMakerBalanceWeth ==  LibAsset._toBaseUnit(2), // I'm down 2 ETH
+            "UNEXPECTED_MAKER_WETH_BALANCE"
+        );
+        require(
+            finalMakerBalanceUsdc - initMakerBalanceUsdc == LibAsset._toBaseUnit(400), // I'm up 2x the initial strike price
+            "UNEXPECTED_MAKER_USDC_BALANCE"
+        );
+        // the taker now has 2 ETH valued much higher
+        require(
+            finalTakerBalanceWeth - initTakerBalanceWeth == LibAsset._toBaseUnit(2),
+            "UNEXPECTED_TAKER_WETH_BALANCE"
+        );
+        require(
+             initTakerBalanceUsdc - finalTakerBalanceUsdc  == LibAsset._toBaseUnit(400), // counterparty is down 2x the strike price
+            "UNEXPECTED_TAKER_USDC_BALANCE"
+        );
     }
 }

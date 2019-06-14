@@ -152,14 +152,10 @@ describe('OptionTokenTest', () => {
             );
          });
 
-         /*
          it('should create synthetic long positions', async () => {
-            await expectTransactionFailedAsync(
-                testContract.testSyntheticLong.sendTransactionAsync(),
-                "OPTION_NOT_FULLY_COLLATERALIZED"
-            );
+            const txReceipt = await logDecoder.getTxWithDecodedLogsAsync(await testContract.testSyntheticLong.sendTransactionAsync({gas: 3000000}));
+            console.log(JSON.stringify(txReceipt.logs, null, 4));
          });
-         */
     });
 });
 // tslint:enable:no-unnecessary-type-assertion
