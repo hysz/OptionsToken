@@ -64,7 +64,7 @@ contract MixinMargin is
 
     function _canMarginCall(bytes32 optionId, LibOption.Option memory option)
         internal
-        //view
+        view
         returns (bool)
     {
         _assertOptionIdMatchesOption(optionId, option);

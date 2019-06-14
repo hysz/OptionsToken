@@ -373,15 +373,90 @@ contract OptionTokenTest {
         );
 
         // set the price to below the strike price
-        oracle.setPrice(LibAsset._toBaseUnit(299));
-        //require(
-            optionToken.canMarginCall(optionId, nakedOption);
-           // "SHOULD_HAVE_BEEN_ABLE_TO_MARGIN_CALL"
-        //);
+        oracle.setPrice(LibAsset._toBaseUnit(199));
+        require(
+            optionToken.canMarginCall(optionId, nakedOption),
+            "SHOULD_HAVE_BEEN_ABLE_TO_MARGIN_CALL"
+        );
+
+        // collateralize with $1 to get outside of margin zone
+        optionToken.collateralize(optionId, nakedOption, LibAsset._toBaseUnit(1));
+        require(
+            !optionToken.canMarginCall(optionId, nakedOption),
+            "SHOULD_NOT_BE_ABLE_TO_MARGIN_CALL"
+        );
+
+        // set the price lower so that we can margin call again
+        oracle.setPrice(LibAsset._toBaseUnit(198));
+
+
+        // get balances before exercise
+        uint256 initMakerBalanceWeth = wethToken.balanceOf(address(this));
+        uint256 initMakerBalanceUsdc = usdcToken.balanceOf(address(this));
+        uint256 initTakerBalanceWeth = wethToken.balanceOf(address(counterParty));
+        uint256 initTakerBalanceUsdc = usdcToken.balanceOf(address(counterParty));
+
+        // execute margin call
+        optionToken.marginCall(optionId, nakedOption);
+
+        // get balances after exercise
+        uint256 finalMakerBalanceWeth = wethToken.balanceOf(address(this));
+        uint256 finalMakerBalanceUsdc = usdcToken.balanceOf(address(this));
+        uint256 finalTakerBalanceWeth = wethToken.balanceOf(address(counterParty));
+        uint256 finalTakerBalanceUsdc = usdcToken.balanceOf(address(counterParty));
+
+         // check that funds were swapped correctly
+        require(
+            finalMakerBalanceWeth - initMakerBalanceWeth == 0,
+            "UNEXPECTED_MAKER_WETH_BALANCE"
+        );
+        require(
+            finalMakerBalanceUsdc - initMakerBalanceUsdc == 0, // only his collateral was lost
+            "UNEXPECTED_MAKER_USDC_BALANCE"
+        );
+        require(
+            finalTakerBalanceWeth - initTakerBalanceWeth == 0,
+            "UNEXPECTED_TAKER_WETH_BALANCE"
+        );
+        require(
+             finalTakerBalanceUsdc - initTakerBalanceUsdc == LibAsset._toBaseUnit(1), // the collateral gained by taker
+            "UNEXPECTED_TAKER_USDC_BALANCE"
+        );
+
+        // verify that option is closed
+        require(
+            !optionToken.isOpen(optionId, nakedOption),
+            "OPTION_SHOULD_BE_CLOSED"
+        );
     }
 
     function testUnsuccessfulMarginCall() external {
+         // create an option
+        LibOption.Option memory nakedOption = LibOption.Option({
+            optionType: LibOption.OptionType.EUROPEAN_PUT,
+            makerAsset: LibAsset.AssetType.USDC,
+            takerAsset: LibAsset.AssetType.WETH,
+            makerAmount: LibAsset._toBaseUnit(200),
+            takerAmount: LibAsset._toBaseUnit(1),
+            expirationTimeInSeconds: block.timestamp + 10000
+        });
 
+        // tokenize it!
+        (bytes32 optionId, bytes32 makerTokenId, bytes32 takerTokenId) = optionToken.tokenize(nakedOption);
+
+        // set the margin tolerance to be 10%
+        optionToken.setMarginTolerance(optionId, 10);
+
+        // give the taker token to our counterparty
+        optionToken.transferFrom(
+            address(this),
+            address(counterParty),
+            uint256(takerTokenId)
+        );
+
+        // set the price to below the strike price
+        oracle.setPrice(LibAsset._toBaseUnit(201));
+        optionToken.marginCall(optionId, nakedOption);
     }
 
     function testSyntheticLong() external {

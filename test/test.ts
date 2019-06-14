@@ -148,16 +148,18 @@ describe('OptionTokenTest', () => {
          it('should fail to margin call outside of the collatearlization threshold', async () => {
             await expectTransactionFailedAsync(
                 testContract.testUnsuccessfulMarginCall.sendTransactionAsync(),
-                "OPTION_NOT_FULLY_COLLATERALIZED"
+                "CANNOT_MARGIN_CALL"
             );
          });
 
+         /*
          it('should create synthetic long positions', async () => {
             await expectTransactionFailedAsync(
                 testContract.testSyntheticLong.sendTransactionAsync(),
                 "OPTION_NOT_FULLY_COLLATERALIZED"
             );
          });
+         */
     });
 });
 // tslint:enable:no-unnecessary-type-assertion

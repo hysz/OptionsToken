@@ -67,7 +67,7 @@ interface IOptionToken /* is IERC721 */
 
     function canMarginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
         external
-        //view
+        view
         returns (bool);
 
     ///// TETHERING API - Defined in ./core/MixinTether.sol /////

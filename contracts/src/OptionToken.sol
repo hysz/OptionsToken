@@ -121,7 +121,7 @@ contract OptionToken is
 
     function canMarginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
         external
-       // view
+        view
         returns (bool)
     {
         return _canMarginCall(nakedOptionId, option);
