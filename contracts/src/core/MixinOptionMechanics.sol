@@ -10,6 +10,7 @@ pragma solidity ^0.5.9;
 pragma experimental ABIEncoderV2;
 
 import "../libs/LibOption.sol";
+import "../libs/LibSafeMath.sol";
 import "./MixinState.sol";
 import "./MixinTokenState.sol";
 import "./MixinOptionState.sol";
@@ -23,6 +24,8 @@ contract MixinOptionMechanics is
     MixinAssets
 {
 
+    using LibSafeMath for uint256;
+
     ///// OPTION MECHANICS /////
 
     function _collateralizeOption(
@@ -35,14 +38,19 @@ contract MixinOptionMechanics is
         // sanity checks
         _assertOptionIdMatchesOption(optionId, option);
 
-        // 
-        uint256 maxAmountAllowed = _computeAmountToBeFullyCollateralized(optionId, option);
-        uint256 amountToDeposit = amount <= maxAmountAllowed ? amount : maxAmountAllowed;
+        // check that we won't deposit too much
+        require(
+            amount <= _computeAmountToBeFullyCollateralized(optionId, option),
+            "CANNOT_OVERCOLLATERALIZE_OPTION"
+        );
+
+        // deposit & record collateral
         _depositAsset(
             option.makerAsset,
             msg.sender,
-            amountToDeposit
+            amount
         );
+        collateralByOptionId[optionId] = collateralByOptionId[optionId]._add(amount);
     }
 
     function _exerciseOption(
@@ -71,6 +79,9 @@ contract MixinOptionMechanics is
             ownerByTokenId[takerTokenId],   // to
             option.makerAmount              // amount
         );
+
+        // record that the option is no longer collateralized
+        collateralByOptionId[optionId] = collateralByOptionId[optionId]._sub(option.makerAmount);
 
         // update option state
         _setOptionState(optionId, LibOption.OptionState.EXERCISED);

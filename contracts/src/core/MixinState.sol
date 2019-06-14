@@ -10,6 +10,7 @@ pragma solidity ^0.5.9;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/IPriceOracle.sol";
+import "../interfaces/IERC20.sol";
 import "../libs/LibOption.sol";
 
 contract MixinState
@@ -36,6 +37,8 @@ contract MixinState
     mapping (bytes32 => uint256) collateralizationToleranceByOptionId;
     
     IPriceOracle priceOracle;
+    IERC20 wethToken;
+    IERC20 usdcToken;
 
     
     mapping (bytes32 => uint256) collateralByOptionId;

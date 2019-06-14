@@ -25,6 +25,14 @@ contract MixinOptionState is
         return option.makerAmount - collateralByOptionId[optionId];
     }
 
+    function _isOptionFullyCollateralized(bytes32 optionId, LibOption.Option memory option)
+        internal
+        view
+        returns (bool)
+    {
+        return _computeAmountToBeFullyCollateralized(optionId, option) == 0;
+    }
+
     function _getOptionState(bytes32 optionId)
         internal
         view
@@ -33,12 +41,22 @@ contract MixinOptionState is
         return optionStateById[optionId];
     }
 
-    function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option) internal pure {
-
+    function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option)
+        internal
+        view
+    {
+        bytes32 optionHash = LibOption._hashOption(option);
+        require(
+            optionHashById[optionId] == optionHash,
+            "OPTION_DOES_NOT_MATCH_OPTION_ID"
+        );
     }
 
     function _assertOptionFullyCollateralized(bytes32 optionId, LibOption.Option memory option) internal view {
-        
+        require(
+            _isOptionFullyCollateralized(optionId, option),
+            "OPTION_NOT_FULLY_COLLATERALIZED"
+        );
     }
 
     function _assignOptionToId(bytes32 optionId, LibOption.Option memory option) internal {

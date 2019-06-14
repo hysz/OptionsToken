@@ -12,8 +12,7 @@ import "../libs/LibOption.sol";
 import "./IERC721.sol";
 
 
-interface IOptionToken //is
-    // IERC721
+interface IOptionToken /* is IERC721 */
 {
 
     function tokenize(LibOption.Option calldata option)
@@ -23,6 +22,11 @@ interface IOptionToken //is
             bytes32 makerTokenId,
             bytes32 takerTokenId
         );
+
+    function getTokenOwner(bytes32 tokenId)
+        external
+        view
+        returns (address);
 
     function cancelAndBurn(
         bytes32 optionId,
@@ -42,4 +46,38 @@ interface IOptionToken //is
         LibOption.Option calldata option
     )
         external;
+
+    function isFullyCollateralized(bytes32 optionId, LibOption.Option calldata option)
+        external
+        returns (bool);
+
+    ///// ERC721 API - Defined in ./core/ERC721.sol /////
+    function ownerOf(uint256 tokenId) external view returns (address);
+    function balanceOf(address owner) external view returns (uint256);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds
+    )
+        external;
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds
+    )
+        external;
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds,
+        bytes calldata
+    )
+        external;
+
+    function getApproved(uint256 tokenId) external view returns (address);
+    function approve(address approved, uint256 tokenId) external;
+    function setApprovalForAll(address operator, bool approved) external;
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
 }

@@ -81,7 +81,7 @@ contract MixinERC721 is
         return _getTokenManager(bytes32(tokenId));
     }
 
-    function approve(address approved, uint256 tokenId) internal {
+    function _approve(address approved, uint256 tokenId) internal {
         _setTokenManager(bytes32(tokenId), approved);
     }
 

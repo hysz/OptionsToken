@@ -9,22 +9,26 @@ pragma solidity ^0.5.9;
 pragma experimental ABIEncoderV2;
 
 import "../libs/LibAsset.sol";
+import "../interfaces/IERC20.sol";
+import "./MixinState.sol";
 
 
-contract MixinAssets {
-
-
-
+contract MixinAssets is
+    MixinState
+{
 
     function _depositAsset(LibAsset.AssetType assetType, address from, uint256 amount) internal {
-
+        IERC20 asset = assetType == LibAsset.AssetType.WETH ? wethToken : usdcToken;
+        asset.transferFrom(from, address(this), amount);
     }
 
     function _withdrawAsset(LibAsset.AssetType assetType, address to, uint256 amount) internal {
-
+        IERC20 asset = assetType == LibAsset.AssetType.WETH ? wethToken : usdcToken;
+        asset.transfer(to, amount);
     }
 
     function _transferAsset(LibAsset.AssetType assetType, address from, address to, uint256 amount) internal {
-
+        IERC20 asset = assetType == LibAsset.AssetType.WETH ? wethToken : usdcToken;
+        asset.transferFrom(from, to, amount);
     }
 }

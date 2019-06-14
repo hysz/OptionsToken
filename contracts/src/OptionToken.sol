@@ -25,9 +25,18 @@ contract OptionToken is
     MixinERC721
 {
 
-    constructor(address _priceOracle) public {
+    constructor(
+        address _priceOracle,
+        address _wethToken,
+        address _usdcToken
+    )
+        public
+    {
         priceOracle = IPriceOracle(_priceOracle);
+        wethToken = IERC20(_wethToken);
+        usdcToken = IERC20(_usdcToken);
         tokenIdNonce = 1;
+
     }
 
 
@@ -72,6 +81,19 @@ contract OptionToken is
     {
         _exerciseOption(optionId, option);
     }
+
+    function getTokenOwner(bytes32 tokenId) external view returns (address) {
+        return _getTokenOwner(tokenId);
+    }
+
+    function isFullyCollateralized(bytes32 optionId, LibOption.Option calldata option)
+        external
+        returns (bool)
+    {
+        return _isOptionFullyCollateralized(optionId, option);
+    }
+
+    
 
     ///// MARGIN API - Defined in ./core/MixinMargin.sol /////
 
@@ -143,4 +165,58 @@ contract OptionToken is
 
     ///// ERC721 API - Defined in ./core/ERC721.sol /////
 
+    function ownerOf(uint256 tokenId) external view returns (address) {
+        return _ownerOf(tokenId);
+    }
+
+    function balanceOf(address owner) external view returns (uint256) {
+        return _balanceOf(owner);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds
+    )
+        external
+    {
+       _transferFrom(from, to, encodedTokenIds);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds
+    )
+        external
+    {
+        _safeTransferFrom(from, to, encodedTokenIds);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds,
+        bytes calldata
+    )
+        external
+    {
+        _safeTransferFrom(from, to, encodedTokenIds);
+    }
+
+    function getApproved(uint256 tokenId) external view returns (address) {
+        return _getApproved(tokenId);
+    }
+
+    function approve(address approved, uint256 tokenId) external {
+        _approve(approved, tokenId);
+    }
+
+    function setApprovalForAll(address operator, bool approved) external {
+        _setApprovalForAll(operator, approved);
+    }
+
+    function isApprovedForAll(address owner, address operator) external view returns (bool) {
+        return _isApprovedForAll(owner, operator);
+    }
 }
