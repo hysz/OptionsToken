@@ -2,6 +2,8 @@
 
 This implements tokenized options on the WETH/USDC pair. Options can be "tethered" to trade with exceptionally high leverage. The MakerDao oracle is used query the spot price for margin calls. This is the brain child of Peter, the friendly 0x research fellow =). This was built as part of the 24h 0x hackathon. _Use at your own risk_ =).
 
+This is currently deployed on Kovan [here](https://kovan.etherscan.io/address/0x19de5368634758eb8dfb44c5615183bb7dd7c738)
+
 ## How it Works - Options
 
 ### 1 Begin by defining your option.
