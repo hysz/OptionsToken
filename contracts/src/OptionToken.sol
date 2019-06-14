@@ -6,18 +6,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
 
 pragma solidity ^0.5.9;
-
 pragma experimental ABIEncoderV2;
 
 
 import "./libs/LibOption.sol";
 import "./interfaces/IPriceOracle.sol";
+import "./interfaces/IOptionToken.sol";
 import "./core/MixinState.sol";
 import "./core/MixinOptionMechanics.sol";
 import "./core/MixinTokenMechanics.sol";
 import "./core/MixinERC721.sol";
 
 contract OptionToken is
+    IOptionToken,
     MixinState,
     MixinOptionMechanics,
     MixinTokenMechanics,
@@ -53,7 +54,6 @@ contract OptionToken is
         _burn(optionId);
     }
 
-/*
     function collateralize(
         bytes32 optionId,
         LibOption.Option calldata option,
@@ -72,7 +72,6 @@ contract OptionToken is
     {
         _exerciseOption(optionId, option);
     }
-*/
 
     ///// MARGIN API - Defined in ./core/MixinMargin.sol /////
 

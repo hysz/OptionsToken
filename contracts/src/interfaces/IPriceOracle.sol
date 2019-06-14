@@ -13,5 +13,5 @@ pragma experimental ABIEncoderV2;
 interface IPriceOracle {
 
     // deployed at  0x729D19f657BD0614b4985Cf1D82531c67569197B
-    function compute() external pure returns (bytes32, bool);
+    function compute() external view returns (bytes32, bool);
 }

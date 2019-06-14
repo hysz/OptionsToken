@@ -11,16 +11,16 @@ pragma experimental ABIEncoderV2;
 
 
 contract TokenProxy {
-    
+
     modifier onlyByClippy() {
-        
+
         _;
     }
-    
+
     function ()
         external
         onlyByClippy
     {
-        
+
     }
 }

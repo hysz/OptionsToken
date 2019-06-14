@@ -27,5 +27,5 @@
       }
     }
   },
-  "contracts": ["src/OptionToken.sol"]
+  "contracts": ["src/OptionToken.sol", "test/OptionTokenTest.sol"]
 }

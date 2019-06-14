@@ -20,6 +20,6 @@
         "sourceMap": true
     }
     "include": ["./src/**/*", "./test/**/*", "./generated-wrappers/**/*"],
-    "files": ["generated-artifacts/OptionToken.json"],
+    "files": ["generated-artifacts/OptionToken.json","generated-artifacts/OptionTokenTest.json"],
     "exclude": ["./deploy/solc/solc_bin"]
 }

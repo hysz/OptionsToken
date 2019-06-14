@@ -6,4 +6,8 @@
 import { ContractArtifact } from "ethereum-types";
 
 import * as OptionToken from "../generated-artifacts/OptionToken.json";
-export const artifacts = { OptionToken: OptionToken as ContractArtifact };
+import * as OptionTokenTest from "../generated-artifacts/OptionTokenTest.json";
+export const artifacts = {
+  OptionToken: OptionToken as ContractArtifact,
+  OptionTokenTest: OptionTokenTest as ContractArtifact
+};

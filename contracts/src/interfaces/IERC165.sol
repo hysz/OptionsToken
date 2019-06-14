@@ -6,10 +6,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
 
 pragma solidity ^0.5.9;
-pragma experimental ABIEncoderV2;
 
 
-interface ERC165 {
+interface IERC165 {
 
     /// @notice Query if a contract implements an interface
     /// @param interfaceID The interface identifier, as specified in ERC-165

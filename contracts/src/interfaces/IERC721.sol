@@ -11,8 +11,7 @@ pragma experimental ABIEncoderV2;
 import "./IERC165.sol";
 
 
-interface ERC721 is
-    IERC165
+interface ERC721 /* is IERC165 */
 {
 
     /// @dev This emits when ownership of any NFT changes by any mechanism.

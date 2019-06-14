@@ -4,3 +4,4 @@
  * -----------------------------------------------------------------------------
  */
 export * from "../generated-wrappers/option_token";
+export * from "../generated-wrappers/option_token_test";

@@ -34,8 +34,8 @@ contract MixinTokenMechanics is
         )
     {
         // create tokens
-        makerTokenId = bytes32(bytes16(tokenIdNonce)) << (2**128);
-        takerTokenId = bytes32(bytes16(tokenIdNonce));
+        makerTokenId = bytes32(uint256(tokenIdNonce)) << 128;
+        takerTokenId = bytes32(uint256(tokenIdNonce));
         tokenIdNonce += 1;
 
         // assign maker/taker token to owner
