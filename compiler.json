@@ -22,5 +22,5 @@
             }
         }
     },
-    "contracts": []
+    "contracts": ["src/OptionToken.sol"]
 }

@@ -11,13 +11,20 @@ pragma experimental ABIEncoderV2;
 
 
 contract MixinERC721 {
+    
     function safeTransferFrom(
         address from,
         address to,
-        uint256 optionHash
+        uint256 encodedTokenIds
     )
         external
     {
-        require(isCollateralized)
+        bytes32[] memory tokenIds = _decodeTokenIds(encodedTokenIds);
+        for (uint256 i = 0; i != tokenIds.length; i++) {
+            _assertTokenOwner(tokenIds[i], from);
+            _assertTokenIsTransferrable(tokenIds[i]);
+            _setTokenOwner(tokenIds[i], to);
+        }
     }
+    
 }

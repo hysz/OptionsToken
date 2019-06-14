@@ -9,19 +9,26 @@ pragma solidity ^0.5.9;
 
 pragma experimental ABIEncoderV2;
 
+import "../libs/LibOption.sol";
+import "../libs/LibToken.sol";
 
-contract MixinToken {
+import "./MixinState.sol";
 
-    mapping (bytes32 => address) ownerByTokenId;
 
-    uint128 tokenIdNonce;
+contract MixinToken is
+    MixinState
+{
 
-    mapping (bytes32 => bytes32) optionHashById;
-    
-    function _mintTokens(address owner, LibOption.Option memory option) internal returns (bytes32 makerTokenId, bytes32 takerTokenId) {
+    function _mint(address owner, LibOption.Option memory option)
+        internal
+        returns (
+            bytes32 makerTokenId,
+            bytes32 takerTokenId
+        )
+    {
         // create tokens
-        makerTokenId = tokenIdNonce << (2**128);
-        takerTokenId = tokenIdNonce;
+        makerTokenId = bytes32(bytes16(tokenIdNonce)) << (2**128);
+        takerTokenId = bytes32(bytes16(tokenIdNonce));
         tokenIdNonce += 1;
 
         // assign maker/taker token to owner
@@ -36,19 +43,21 @@ contract MixinToken {
         return (makerTokenId, takerTokenId);
     }
 
+    
+
+
+    /*
+
+    
+    
+
     function _getOwner(bytes32 tokenId) internal view returns (address) {
         return ownerByTokenId[tokenId];
     }
 
 
-    bytes32 makerTokenMask = 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000;
-    bytes32 takerTokenMask = 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff;
-    function _getTokensFromOptionId(bytes32 optionId) internal pure returns (bytes32 makerTokenId, bytes32 takerTokenId) {
-        makerTokenId = optionId & makerTokenMask;
-        takerTokenId = optionId & takerTokenMask;
-
-        return (makerTokenId, takerTokenId);
-    }
+    
+    
 
     function _getOptionIdFromTokenId(bytes32 tokenId)
         internal
@@ -97,4 +106,5 @@ contract MixinToken {
             "ONLY_OPEN_OPTIONS_CAN_BE_TRANSFERRED"
         );
     }
+    */
 }
