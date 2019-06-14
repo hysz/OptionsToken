@@ -342,14 +342,42 @@ contract OptionTokenTest {
         });
 
         // tokenize it!
-        (bytes32 optionId, bytes32 makerTokenId, bytes32 takerTokenId) = optionToken.tokenize(option);
+        (bytes32 optionId,,) = optionToken.tokenize(option);
 
         // try to exercise when counterparty does not hold option
         optionToken.exercise(optionId, option);
     }
 
     function testSuccessfulMarginCall() external {
+        // create an option
+        LibOption.Option memory nakedOption = LibOption.Option({
+            optionType: LibOption.OptionType.EUROPEAN_PUT,
+            makerAsset: LibAsset.AssetType.USDC,
+            takerAsset: LibAsset.AssetType.WETH,
+            makerAmount: LibAsset._toBaseUnit(200),
+            takerAmount: LibAsset._toBaseUnit(1),
+            expirationTimeInSeconds: block.timestamp + 10000
+        });
 
+        // tokenize it!
+        (bytes32 optionId, bytes32 makerTokenId, bytes32 takerTokenId) = optionToken.tokenize(nakedOption);
+
+        // set the margin tolerance to be 10%
+        optionToken.setMarginTolerance(optionId, 10);
+
+        // give the taker token to our counterparty
+        optionToken.transferFrom(
+            address(this),
+            address(counterParty),
+            uint256(takerTokenId)
+        );
+
+        // set the price to below the strike price
+        oracle.setPrice(LibAsset._toBaseUnit(199));
+        require(
+            optionToken.canMarginCall(optionId, nakedOption),
+            "SHOULD_HAVE_BEEN_ABLE_TO_MARGIN_CALL"
+        );
     }
 
     function testUnsuccessfulMarginCall() external {
@@ -357,6 +385,6 @@ contract OptionTokenTest {
     }
 
     function testSyntheticLong() external {
-
+        
     }
 }

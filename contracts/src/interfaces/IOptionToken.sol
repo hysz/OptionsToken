@@ -57,6 +57,37 @@ interface IOptionToken /* is IERC721 */
         view
         returns (bool);
 
+        ///// MARGIN API - Defined in ./core/MixinMargin.sol /////
+
+    function setMarginTolerance(bytes32 nakedOptionId, uint8 tolerance)
+        external;
+
+    function marginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
+        external;
+
+    function canMarginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
+        external
+        view
+        returns (bool);
+
+    ///// TETHERING API - Defined in ./core/MixinTether.sol /////
+
+    function tether(
+        bytes32 leftOptionId,
+        LibOption.Option calldata leftOption,
+        bytes32 rightOptionId,
+        LibOption.Option calldata rightOption
+    )
+        external;
+
+    function untether(
+        bytes32 leftOptionId,
+        LibOption.Option calldata leftOption,
+        bytes32 rightOptionId,
+        LibOption.Option calldata rightOption
+    )
+        external;
+
     ///// ERC721 API - Defined in ./core/ERC721.sol /////
     function ownerOf(uint256 tokenId) external view returns (address);
     function balanceOf(address owner) external view returns (uint256);

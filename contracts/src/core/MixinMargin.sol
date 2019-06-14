@@ -73,13 +73,13 @@ contract MixinMargin is
         );
 
         uint256 strikePrice = LibOption._computeStrikePrice(option);
-        uint256 spotPrice = (option.takerAsset == LibAsset.AssetType.USDC) ? _getEthSpotPriceInUsd() : _getUsdSpotPriceInEth();
+        uint256 spotPrice = (option.makerAsset == LibAsset.AssetType.USDC) ? _getEthSpotPriceInUsd() : _getUsdSpotPriceInEth();
         
-        uint256 opposingIntrinsicValue = spotPrice > strikePrice ? spotPrice - strikePrice : 0;
-        uint256 marginTolerance = marginToleranceByOptionId[optionId];
-        uint256 marginThreshold = (opposingIntrinsicValue._mul(marginTolerance))._div(100);
+        //uint256 opposingIntrinsicValue = spotPrice > strikePrice ? spotPrice - strikePrice : 0;
+        //uint256 marginTolerance = marginToleranceByOptionId[optionId];
+        //uint256 marginThreshold = (opposingIntrinsicValue._mul(100 + marginTolerance))._div(100);
 
-        uint256 marginCallPrice = strikePrice._add(marginThreshold);
+        uint256 marginCallPrice = strikePrice;//strikePrice._add(marginThreshold);
         uint256 collateral = _getCollateral(optionId);
 
         if (marginCallPrice > spotPrice && collateral < marginCallPrice - spotPrice) {

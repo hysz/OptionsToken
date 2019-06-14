@@ -139,6 +139,25 @@ describe('OptionTokenTest', () => {
                 "OPTION_NOT_FULLY_COLLATERALIZED"
             );
          });
+
+         it('should successfully margin call at collateralization threshold', async () => {
+            const txReceipt = await logDecoder.getTxWithDecodedLogsAsync(await testContract.testSuccessfulMarginCall.sendTransactionAsync({gas: 3000000}));
+            console.log(JSON.stringify(txReceipt.logs, null, 4));
+         });
+
+         it('should fail to margin call outside of the collatearlization threshold', async () => {
+            await expectTransactionFailedAsync(
+                testContract.testUnsuccessfulMarginCall.sendTransactionAsync(),
+                "OPTION_NOT_FULLY_COLLATERALIZED"
+            );
+         });
+
+         it('should create synthetic long positions', async () => {
+            await expectTransactionFailedAsync(
+                testContract.testSyntheticLong.sendTransactionAsync(),
+                "OPTION_NOT_FULLY_COLLATERALIZED"
+            );
+         });
     });
 });
 // tslint:enable:no-unnecessary-type-assertion
