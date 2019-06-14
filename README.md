@@ -1,22 +1,11 @@
-## ERC1155 Tokens
+## Option Tokens
 
-This package implements the stake-based liquidity incentives defined by [ZEIP-31](https://github.com/0xProject/ZEIPs/issues/31). Addresses of the deployed contracts can be found in the 0x [wiki](https://0xproject.com/wiki#Deployed-Addresses) or the [DEPLOYS](./DEPLOYS.json) file within this package.
+This implements tokenized options on the WETH/USDC pair. Options can be "tethered" to trade with exceptionally high leverage. The MakerDao price oracle is used query a spot price for margin calls. This is the brain child of Peter the friendly 0x research fellow. This was built as part of the 24h 0x hackathon. _Use at your own risk_ =).
 
-## Installation
 
-**Install**
 
-```bash
-npm install @0x/contracts-staking --save
-```
 
-## Contributing
-
-We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
-
-For proposals regarding the 0x protocol's smart contract architecture, message format, or additional functionality, go to the [0x Improvement Proposals (ZEIPs)](https://github.com/0xProject/ZEIPs) repository and follow the contribution guidelines provided therein.
-
-Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
+In fact, don't use it at all.
 
 ### Install Dependencies
 
@@ -34,16 +23,8 @@ yarn install
 
 ### Build
 
-To build this package and all other monorepo packages that it depends on, run the following from the monorepo root directory:
-
 ```bash
-PKG=@0x/contracts-staking yarn build
-```
-
-Or continuously rebuild on change:
-
-```bash
-PKG=@0x/contracts-staking yarn watch
+yarn build
 ```
 
 ### Clean
@@ -63,7 +44,3 @@ yarn lint
 ```bash
 yarn test
 ```
-
-#### Testing options
-
-Contracts testing options like coverage, profiling, revert traces or backing node choosing - are described [here](../TESTING.md).

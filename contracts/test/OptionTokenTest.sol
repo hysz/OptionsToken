@@ -347,4 +347,16 @@ contract OptionTokenTest {
         // try to exercise when counterparty does not hold option
         optionToken.exercise(optionId, option);
     }
+
+    function testSuccessfulMarginCall() external {
+
+    }
+
+    function testUnsuccessfulMarginCall() external {
+
+    }
+
+    function testSyntheticLong() external {
+
+    }
 }
