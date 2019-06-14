@@ -14,6 +14,7 @@ import "./libs/LibOption.sol";
 
 import "./core/MixinState.sol";
 import "./core/MixinToken.sol";
+import "./core/MixinERC721.sol";
 
 contract OptionToken is
     MixinState,
@@ -22,9 +23,8 @@ contract OptionToken is
     MixinAssets,
     MixinOptions,
     MixinTether,*/
-    MixinToken/*,
+    MixinToken,
     MixinERC721
-    */
 {
 
     constructor(address _priceOracle) public {
@@ -39,8 +39,10 @@ contract OptionToken is
         external
         returns (bytes32 makerTokenId, bytes32 takerTokenId)
     {
-        return _mint(msg.sender, option);
+        return _mintTokens(msg.sender, option);
     }
+
+    ///// ERC721 API - Defined in ./core/ERC721.sol /////
 
 
     ///// OPTIONS API - Defined in ./core/MixinOptions.sol /////

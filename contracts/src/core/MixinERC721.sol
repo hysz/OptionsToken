@@ -6,25 +6,90 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
 
 pragma solidity ^0.5.9;
-
 pragma experimental ABIEncoderV2;
 
+import "../interfaces/IERC721Receiver.sol";
+import "../libs/LibToken.sol";
+import "../libs/LibAddress.sol";
+import "./MixinToken.sol";
 
-contract MixinERC721 {
-    
-    function safeTransferFrom(
+
+contract MixinERC721 is
+    MixinToken
+{
+
+    using LibAddress for address;
+
+    bytes4 internal constant ERC721_ON_RECEIVED_CALLBACK = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
+
+    function _ownerOf(uint256 tokenId) internal view returns (address) {
+        return _getTokenOwner(bytes32(tokenId));
+    }
+
+    function _balanceOf(address owner) internal view returns (uint256) {
+        return _getTokenCount(owner);
+    }
+
+    function _transferFrom(
         address from,
         address to,
         uint256 encodedTokenIds
     )
-        external
+        internal
     {
-        bytes32[] memory tokenIds = _decodeTokenIds(encodedTokenIds);
+        bytes32[] memory tokenIds = LibToken._decodeTokenIds(encodedTokenIds);
         for (uint256 i = 0; i != tokenIds.length; i++) {
-            _assertTokenOwner(tokenIds[i], from);
-            _assertTokenIsTransferrable(tokenIds[i]);
-            _setTokenOwner(tokenIds[i], to);
+            _transferToken(from, to, tokenIds[i]);
         }
     }
-    
+
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds
+    )
+        internal
+    {
+
+        // transfer token(s)
+        _transferFrom(from, to, encodedTokenIds);
+
+        // we're done if contract is not a receiver
+        if (!to.isContract()) {
+            return;
+        }
+
+        // `to` is a contract - execute its callback
+        require(
+            IERC721Receiver(to).onERC721Received(msg.sender, from, encodedTokenIds, bytes(hex"")) == ERC721_ON_RECEIVED_CALLBACK,
+            "INVALID_ERC721_RECEIVER"
+        );
+    }
+
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 encodedTokenIds,
+        bytes memory
+    )
+        internal
+    {
+        _safeTransferFrom(from, to, encodedTokenIds);
+    }
+
+    function _getApproved(uint256 tokenId) internal view returns (address) {
+        return _getTokenManager(bytes32(tokenId));
+    }
+
+    function approve(address approved, uint256 tokenId) internal {
+        _setTokenManager(bytes32(tokenId), approved);
+    }
+
+    function _setApprovalForAll(address operator, bool approved) internal {
+        _setTokenOwnerOperator(msg.sender, operator, approved);
+    }
+
+    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
+        return _isTokenOwnerOperator(owner, operator);
+    }
 }

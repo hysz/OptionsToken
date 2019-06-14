@@ -19,7 +19,9 @@ contract MixinToken is
     MixinState
 {
 
-    function _mint(address owner, LibOption.Option memory option)
+    ///// TOKEN MECHANICS /////
+
+    function _mintTokens(address owner, LibOption.Option memory option)
         internal
         returns (
             bytes32 makerTokenId,
@@ -32,8 +34,11 @@ contract MixinToken is
         tokenIdNonce += 1;
 
         // assign maker/taker token to owner
-        ownerByTokenId[makerTokenId] = owner;
-        ownerByTokenId[takerTokenId] = owner;
+        _setTokenOwner(makerTokenId, owner);
+        _setTokenOwner(takerTokenId, owner);
+
+        // increment number of tokens held by owner
+        tokenCountByOwner[owner] += 2;
 
         // assign option hash to tokens
         bytes32 optionId = makerTokenId | takerTokenId;
@@ -43,39 +48,97 @@ contract MixinToken is
         return (makerTokenId, takerTokenId);
     }
 
-    
+    function _transferToken(
+        address from,
+        address to,
+        bytes32 tokenId
+    )
+        internal
+    {
+        // sanity checks
+        _assertTokenOwner(tokenId, from);
+        _assertTokenIsTransferrable(tokenId);
+        _assertCanSenderTransferToken(tokenId, msg.sender);
 
+        // update token owner
+        _setTokenOwner(tokenId, to);
 
-    /*
+        // update number of tokens held by owner
+        tokenCountByOwner[from] -= 1;
+        tokenCountByOwner[to] += 1;
+    }
 
-    
-    
+    function _isTokenTransferrable(bytes32 tokenId)
+        internal
+        view
+        returns (bool isTransferrable)
+    {
+        /*
+        bytes32 optionId = LibToken._getOptionIdFromTokenId(tokenId);
+        isTransferrable = _getOptionState(optionId) == LibOption.OptionState.OPEN;
+        return isTransferrable;
+        */
+    }
 
-    function _getOwner(bytes32 tokenId) internal view returns (address) {
+    function _canSenderTransferToken(bytes32 tokenId, address sender) internal view returns (bool) {
+        return _isTokenOwner(tokenId, sender) || _isTokenManager(tokenId, sender) || _isTokenOwnerOperator(_getTokenOwner(tokenId), sender);
+    }
+
+    ///// CONVENIENCE FUNCTIONS FOR MANAGING & QUERYING STATE /////
+
+    function _setTokenOwner(bytes32 tokenId, address owner)
+        internal
+    {
+        ownerByTokenId[tokenId] = owner;
+        _setTokenManager(tokenId, owner);
+    }
+
+    function _getTokenOwner(bytes32 tokenId)
+        internal
+        view
+        returns (address)
+    {
         return ownerByTokenId[tokenId];
     }
 
-
-    
-    
-
-    function _getOptionIdFromTokenId(bytes32 tokenId)
+    function _isTokenOwner(bytes32 tokenId, address owner)
         internal
-        pure
-        returns (bytes32 optionId)
+        view
+        returns (bool)
     {
-
+        return _getTokenOwner(tokenId) == owner;
     }
 
-    function _assertOptionOwner(bytes32 optionId, address owner) internal view {
-        (bytes32 makerTokenId, bytes32 takerTokenId) = _getTokensFromOptionId(optionId);
+    function _getTokenCount(address owner) internal view returns (uint256) {
+        return tokenCountByOwner[owner];
+    }
+
+    function _setTokenManager(bytes32 tokenId, address manager) internal {
+        managerByTokenId[tokenId] = manager;
+    }
+
+    function _getTokenManager(bytes32 tokenId) internal view returns (address) {
+        return managerByTokenId[tokenId];
+    }
+
+    function _isTokenManager(bytes32 tokenId, address manager) internal view returns (bool) {
+        return (_getTokenManager(tokenId) == manager);
+    }
+
+    function _isTokenOwnerOperator(address owner, address operator) internal view returns (bool) {
+        return tokenOwnerOperatorsByAddress[owner][operator];
+    }
+
+    function _setTokenOwnerOperator(address owner, address operator, bool isOwnerOperator) internal {
+        tokenOwnerOperatorsByAddress[owner][operator] = isOwnerOperator;
+    }
+
+    ///// ASSERTIONS /////
+
+    function _assertCanSenderTransferToken(bytes32 tokenId, address sender) internal view {
         require(
-            _getOwner(makerTokenId) == owner,
-            "OWNER_DOES_NOT_HOLD_MAKER_TOKEN"
-        );
-        require(
-            _getOwner(takerTokenId) == owner,
-            "OWNER_DOES_NOT_HOLD_TAKER_TOKEN"
+            _canSenderTransferToken(tokenId, sender),
+            "SENDER_CANNOT_TRANSFER_TOKEN"
         );
     }
 
@@ -86,25 +149,10 @@ contract MixinToken is
         );
     }
 
-    function _setTokenOwner(bytes32 tokenId, address owner) internal {
-        tokenOwnerById[tokenId] = owner;
-    }
-
-    function _assertOptionIdMatchesOption(optionId, option) internal pure {
-
-    }
-
-    function _getOptionState(bytes32 optionId) internal pure {
-        return optionStateById[optionId];
-    }
-
-    function _assertTokenIsTransferrable(bytes32 tokenId) internal pure {
-        bytes32 optionId = _getOptionIdFromTokenId(tokenId);
-
+    function _assertTokenIsTransferrable(bytes32 tokenId) internal view {
         require(
-            _getOptionState(optionId) == LibOption.OptionState.OPEN,
+            _isTokenTransferrable(tokenId),
             "ONLY_OPEN_OPTIONS_CAN_BE_TRANSFERRED"
         );
     }
-    */
 }

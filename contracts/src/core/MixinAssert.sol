@@ -24,4 +24,24 @@ contract MixinAssert is
             "OPTION_IS_TETHERED"
         );
     }
+
+    function _assertOptionOwner(bytes32 optionId, address owner) internal view {
+        (bytes32 makerTokenId, bytes32 takerTokenId) = _getTokensFromOptionId(optionId);
+        require(
+            _getOwner(makerTokenId) == owner,
+            "OWNER_DOES_NOT_HOLD_MAKER_TOKEN"
+        );
+        require(
+            _getOwner(takerTokenId) == owner,
+            "OWNER_DOES_NOT_HOLD_TAKER_TOKEN"
+        );
+    }
+
+    
+
+    function _assertOptionIdMatchesOption(optionId, option) internal pure {
+
+    }
+
+    
 }
