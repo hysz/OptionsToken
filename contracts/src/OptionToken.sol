@@ -16,13 +16,15 @@ import "./core/MixinState.sol";
 import "./core/MixinOptionMechanics.sol";
 import "./core/MixinTokenMechanics.sol";
 import "./core/MixinERC721.sol";
+import "./core/MixinMargin.sol";
 
 contract OptionToken is
     IOptionToken,
     MixinState,
     MixinOptionMechanics,
     MixinTokenMechanics,
-    MixinERC721
+    MixinERC721,
+    MixinMargin
 {
 
     constructor(
@@ -105,12 +107,12 @@ contract OptionToken is
 
     ///// MARGIN API - Defined in ./core/MixinMargin.sol /////
 
-/*
     function setMarginTolerance(bytes32 nakedOptionId, uint8 tolerance)
         external
     {
-        _setCollateralizationTolerance(optionId, tolerance);
+        _setMarginTolerance(nakedOptionId, tolerance);
     }
+
 
     function getMarginTolerance(bytes32 nakedOptionId)
         external
@@ -125,14 +127,16 @@ contract OptionToken is
 
     }
 
-    function canMarginCall(bytes32 optionId, LibOption.Option calldata option)
+    function canMarginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
         external
+        view
         returns (bool)
     {
-        return _canMarginCall(option);
+        return _canMarginCall(nakedOptionId, option);
     }
+    /**/
 
-
+/*
 
     ///// TETHERING API - Defined in ./core/MixinTether.sol /////
 

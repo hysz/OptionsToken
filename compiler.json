@@ -27,5 +27,10 @@
       }
     }
   },
-  "contracts": ["src/OptionToken.sol", "test/OptionTokenTest.sol"]
+  "contracts": [
+    "src/OptionToken.sol",
+    "test/OptionTokenTest.sol",
+    "test/utils/ERC20.sol",
+    "test/utils/PriceOracle.sol"
+  ]
 }

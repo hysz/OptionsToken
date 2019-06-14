@@ -133,13 +133,4 @@ contract MixinOptionMechanics is
     {
     
     }
-
-    function _assertOptionNotTethered(bytes32 optionId)
-        internal
-    {
-        require(
-            tetherByOptionId[optionId] == 0,
-            "OPTION_IS_TETHERED"
-        );
-    }
 }

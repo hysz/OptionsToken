@@ -20,6 +20,6 @@
         "sourceMap": true
     }
     "include": ["./src/**/*", "./test/**/*", "./generated-wrappers/**/*"],
-    "files": ["generated-artifacts/OptionToken.json","generated-artifacts/OptionTokenTest.json"],
+    "files": ["generated-artifacts/OptionToken.json","generated-artifacts/OptionTokenTest.json","generated-artifacts/PriceOracle.json","generated-artifacts/ERC20.json"],
     "exclude": ["./deploy/solc/solc_bin"]
 }

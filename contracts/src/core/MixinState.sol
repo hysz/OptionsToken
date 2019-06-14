@@ -34,7 +34,7 @@ contract MixinState
     mapping (bytes32 => bytes32) optionHashById;
 
     mapping (bytes32 => bytes32) tetherByOptionId;
-    mapping (bytes32 => uint256) collateralizationToleranceByOptionId;
+    mapping (bytes32 => uint256) marginToleranceByOptionId;
     
     IPriceOracle priceOracle;
     IERC20 wethToken;

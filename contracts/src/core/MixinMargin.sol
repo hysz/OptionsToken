@@ -6,40 +6,61 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
 
 pragma solidity ^0.5.9;
-
 pragma experimental ABIEncoderV2;
 
+import "../libs/LibOption.sol";
 import "../libs/LibToken.sol";
+import "../libs/LibAsset.sol";
 import "./MixinState.sol";
+import "./MixinTokenState.sol";
+import "./MixinOptionState.sol";
 
 
 contract MixinMargin is
-    MixinState
+    MixinState,
+    MixinTokenState,
+    MixinOptionState
 {
 
-  /*
-    function _setCollateralizationTolerance(bytes32 optionId, uint256 tolerance)
+    function _setMarginTolerance(bytes32 optionId, uint256 tolerance)
         internal
     {
-        _assertOptionOwner(optionId, msg.sender);
+        _assertHoldsBothTokens(optionId, msg.sender);
         _assertOptionNotTethered(optionId);
-        collateralizationToleranceByOptionId[leftOptionId] = tolerance;
+        marginToleranceByOptionId[optionId] = tolerance;
     }
-
-  
 
     // Margin call an under-collateralized position (makerdao price oracle)
-    function _marginCall(LibOption.Option calldata option)
+    function _marginCall(bytes32 optionId, LibOption.Option memory option)
         internal
     {
 
     }
 
-    function _canMarginCall(LibOption.Option calldata option)
+    function _canMarginCall(bytes32 optionId, LibOption.Option memory option)
         internal
+        view
+        returns (bool)
     {
-
+        
     }
 
-    */
+    function _getEthSpotPriceInUsd()
+        internal
+        view
+        returns (uint256)
+    {
+        (bytes32 price,) = priceOracle.compute();
+        return uint256(price);
+    }
+
+    function _getUsdSpotPriceInEth()
+        internal
+        view
+        returns (uint256)
+    {
+        (bytes32 price,) = priceOracle.compute();
+        uint256 inversePrice = 1 / uint256(price);
+        return inversePrice;
+    }
 }

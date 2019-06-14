@@ -5,9 +5,13 @@
  */
 import { ContractArtifact } from "ethereum-types";
 
+import * as ERC20 from "../generated-artifacts/ERC20.json";
 import * as OptionToken from "../generated-artifacts/OptionToken.json";
 import * as OptionTokenTest from "../generated-artifacts/OptionTokenTest.json";
+import * as PriceOracle from "../generated-artifacts/PriceOracle.json";
 export const artifacts = {
   OptionToken: OptionToken as ContractArtifact,
-  OptionTokenTest: OptionTokenTest as ContractArtifact
+  OptionTokenTest: OptionTokenTest as ContractArtifact,
+  ERC20: ERC20 as ContractArtifact,
+  PriceOracle: PriceOracle as ContractArtifact
 };
