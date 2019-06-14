@@ -14,11 +14,15 @@ import "../interfaces/IPriceOracle.sol";
 contract MixinState
 {
 
-    IPriceOracle priceOracle;
+    // For querying ETH/USD price
+    
 
+    // Token
     uint128 tokenIdNonce;
     mapping (bytes32 => address) ownerByTokenId;
     mapping (address => uint256) tokenCountByOwner;
+
+    // ERC721
     mapping (bytes32 => address) managerByTokenId;
     mapping (address => mapping (address => bool)) tokenOwnerOperatorsByAddress;
 

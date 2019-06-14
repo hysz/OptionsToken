@@ -12,8 +12,9 @@ pragma experimental ABIEncoderV2;
 
 import "./libs/LibOption.sol";
 
+
 import "./core/MixinState.sol";
-import "./core/MixinToken.sol";
+import "./core/MixinTokenMechanics.sol";
 import "./core/MixinERC721.sol";
 
 contract OptionToken is
@@ -21,9 +22,11 @@ contract OptionToken is
     /*
     MixinBalances,
     MixinAssets,
-    MixinOptions,
+    */
+    //MixinOptions,
+    /*
     MixinTether,*/
-    MixinToken,
+    MixinTokenMechanics,
     MixinERC721
 {
 
@@ -33,19 +36,27 @@ contract OptionToken is
     }
 
 
-    ///// TOKEN API - Defined in ./core/MixinToken.sol /////
+    ///// OPTIONS API - Defined in ./core/MixinOptions.sol /////
 
-    function mint(LibOption.Option calldata option)
+    function tokenize(LibOption.Option calldata option)
         external
-        returns (bytes32 makerTokenId, bytes32 takerTokenId)
+        returns (
+            bytes32 optionId,
+            bytes32 makerTokenId,
+            bytes32 takerTokenId
+        )
     {
-        return _mintTokens(msg.sender, option);
+        return _mint(option, msg.sender);
     }
 
-    ///// ERC721 API - Defined in ./core/ERC721.sol /////
-
-
-    ///// OPTIONS API - Defined in ./core/MixinOptions.sol /////
+    function burn(
+        bytes32 optionId,
+        LibOption.Option calldata option
+    )
+        external
+    {
+        _burn(optionId, option);
+    }
 
 /*
     function collateralize(
@@ -55,7 +66,7 @@ contract OptionToken is
     )
         external
     {
-        _collateralize(optionId, option, amount);
+        _collateralizeOption(optionId, option, amount);
     }
 
     function exercise(
@@ -64,26 +75,42 @@ contract OptionToken is
     )
         external
     {
-        _exercise(optionId, option);
+        _exerciseOption(optionId, option);
     }
-    
-    function cancel(bytes32 optionId)
-        external
-    {
-        _cancel(optionId);
-    }
+*/
 
-    */
-
+    ///// MARGIN API - Defined in ./core/MixinMargin.sol /////
 
 /*
-    ///// TETHERING API - Defined in ./core/MixinTether.sol /////
-
-    function setCollateralizationTolerance(bytes32 optionId, uint256 tolerance)
+    function setMarginTolerance(bytes32 nakedOptionId, uint8 tolerance)
         external
     {
         _setCollateralizationTolerance(optionId, tolerance);
     }
+
+    function getMarginTolerance(bytes32 nakedOptionId)
+        external
+        returns (uint8)
+    {
+
+    }
+
+    function marginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
+        external
+    {
+
+    }
+
+    function canMarginCall(bytes32 optionId, LibOption.Option calldata option)
+        external
+        returns (bool)
+    {
+        return _canMarginCall(option);
+    }
+
+
+
+    ///// TETHERING API - Defined in ./core/MixinTether.sol /////
 
     function tether(bytes32 leftOptionId, bytes32 rightOptionId)
         external
@@ -101,19 +128,25 @@ contract OptionToken is
     {
         _untether(leftOptionId, leftOption, rightOptionId, rightOption);
     }
-    
-    function marginCall(LibOption.Option calldata option)
-        external
-    {
-        _marginCall(option);
-    }
 
-    function canMarginCall(LibOption.Option calldata option)
+    function canUntether(
+        bytes32 leftOptionId,
+        LibOption.Option calldata leftOption,
+        bytes32 rightOptionId,
+        LibOption.Option calldata rightOption
+    )
         external
         returns (bool)
     {
-        return _canMarginCall(option);
+        //return _canUntether(leftOptionId, leftOption, rightOptionId, rightOption);
     }
-
     */
+
+    
+    ///// TOKEN API - Defined in ./core/MixinToken.sol /////
+
+    
+
+    ///// ERC721 API - Defined in ./core/ERC721.sol /////
+
 }

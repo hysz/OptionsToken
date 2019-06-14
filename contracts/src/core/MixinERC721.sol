@@ -11,11 +11,11 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/IERC721Receiver.sol";
 import "../libs/LibToken.sol";
 import "../libs/LibAddress.sol";
-import "./MixinToken.sol";
+import "./MixinTokenMechanics.sol";
 
 
 contract MixinERC721 is
-    MixinToken
+    MixinTokenMechanics
 {
 
     using LibAddress for address;
