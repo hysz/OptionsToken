@@ -25,6 +25,14 @@ contract MixinOptionState is
         return option.makerAmount - collateralByOptionId[optionId];
     }
 
+    function _getCollateral(bytes32 optionId)
+        internal
+        view
+        returns (uint256)
+    {
+        return collateralByOptionId[optionId];
+    }
+
     function _isOptionFullyCollateralized(bytes32 optionId, LibOption.Option memory option)
         internal
         view
@@ -84,6 +92,13 @@ contract MixinOptionState is
         require(
             _isOptionOpen(optionId, option),
             "OPTION_NOT_OPEN"
+        );
+    }
+
+    function _assertValidOption(LibOption.Option memory option) internal {
+        require(
+            option.makerAsset != option.takerAsset,
+            "ASSETS_MUST_BE_DIFFERENT"
         );
     }
 

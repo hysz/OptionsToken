@@ -14,12 +14,14 @@ import "../libs/LibAsset.sol";
 import "./MixinState.sol";
 import "./MixinTokenState.sol";
 import "./MixinOptionState.sol";
+import "./MixinAssets.sol";
 
 
 contract MixinMargin is
     MixinState,
     MixinTokenState,
-    MixinOptionState
+    MixinOptionState,
+    MixinAssets
 {
 
     function _setMarginTolerance(bytes32 optionId, uint256 tolerance)
@@ -34,7 +36,21 @@ contract MixinMargin is
     function _marginCall(bytes32 optionId, LibOption.Option memory option)
         internal
     {
+        require(
+            _canMarginCall(optionId, option),
+            "CANNOT_MARGIN_CALL"
+        );
 
+        // lookup counterparty
+        (,bytes32 takerTokenId) = LibToken._getTokensFromOptionId(optionId);
+        address taker = _getTokenOwner(takerTokenId);
+
+        //send collateral to taker
+        uint256 collateral = _getCollateral(optionId);
+        _withdrawAsset(option.makerAsset, taker, collateral);
+
+        // close option with state margin called
+        _setOptionState(optionId, LibOption.OptionState.MARGIN_CALLED);
     }
 
     function _canMarginCall(bytes32 optionId, LibOption.Option memory option)
@@ -42,7 +58,17 @@ contract MixinMargin is
         view
         returns (bool)
     {
-        
+        _assertOptionIdMatchesOption(optionId, option);
+        _assertOptionStateIsOpen(optionId, option);
+
+        uint256 strikePrice = LibOption._computeStrikePrice(option);
+        uint256 spotPrice = (option.takerAsset == LibAsset.AssetType.USDC) ? _getEthSpotPriceInUsd() : _getUsdSpotPriceInEth();
+        uint256 collateral = _getCollateral(optionId);
+
+        if (strikePrice > spotPrice && collateral < strikePrice - spotPrice) {
+            return true;
+        }
+        return false;
     }
 
     function _getEthSpotPriceInUsd()

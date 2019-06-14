@@ -33,6 +33,9 @@ contract MixinTokenMechanics is
             bytes32 takerTokenId
         )
     {
+        // sanity check
+        _assertValidOption(option);
+
         // create tokens
         makerTokenId = bytes32(uint256(tokenIdNonce)) << 128;
         takerTokenId = bytes32(uint256(tokenIdNonce));

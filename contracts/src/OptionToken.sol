@@ -38,7 +38,6 @@ contract OptionToken is
         wethToken = IERC20(_wethToken);
         usdcToken = IERC20(_usdcToken);
         tokenIdNonce = 1;
-
     }
 
 
@@ -118,7 +117,7 @@ contract OptionToken is
         external
         returns (uint8)
     {
-
+        
     }
 
     function marginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
@@ -134,7 +133,6 @@ contract OptionToken is
     {
         return _canMarginCall(nakedOptionId, option);
     }
-    /**/
 
 /*
 
