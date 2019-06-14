@@ -60,9 +60,11 @@ contract MixinMargin is
         _setOptionState(optionId, LibOption.OptionState.MARGIN_CALLED);
     }
 
+    event EE(uint256 strikePrice, uint256 spotPrice);
+
     function _canMarginCall(bytes32 optionId, LibOption.Option memory option)
         internal
-        view
+        //view
         returns (bool)
     {
         _assertOptionIdMatchesOption(optionId, option);
@@ -72,8 +74,8 @@ contract MixinMargin is
             "OPTION_MUST_BE_OPEN__OR__EXPIRED_AND_TETHERED"
         );
 
-        uint256 strikePrice = LibOption._computeStrikePrice(option);
-        uint256 spotPrice = (option.makerAsset == LibAsset.AssetType.USDC) ? _getEthSpotPriceInUsd() : _getUsdSpotPriceInEth();
+        uint256 strikePrice = LibOption._computeStrikePriceInUSD(option);
+        uint256 spotPrice = _getEthSpotPriceInUsd();
         
         //uint256 opposingIntrinsicValue = spotPrice > strikePrice ? spotPrice - strikePrice : 0;
         //uint256 marginTolerance = marginToleranceByOptionId[optionId];
@@ -81,7 +83,6 @@ contract MixinMargin is
 
         uint256 marginCallPrice = strikePrice;//strikePrice._add(marginThreshold);
         uint256 collateral = _getCollateral(optionId);
-
         if (marginCallPrice > spotPrice && collateral < marginCallPrice - spotPrice) {
             return true;
         }
