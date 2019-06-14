@@ -52,7 +52,7 @@ interface IOptionToken /* is IERC721 */
         view
         returns (bool);
 
-    function isOpen(bytes32 optionId)
+    function isOpen(bytes32 optionId, LibOption.Option calldata option)
         external
         view
         returns (bool);

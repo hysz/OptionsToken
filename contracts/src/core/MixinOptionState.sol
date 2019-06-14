@@ -41,12 +41,16 @@ contract MixinOptionState is
         return optionStateById[optionId];
     }
 
-    function _isOptionOpen(bytes32 optionId)
+    function _isOptionOpen(bytes32 optionId, LibOption.Option memory option)
         internal
         view
         returns (bool)
     {
-        return _getOptionState(optionId) == LibOption.OptionState.OPEN;
+        return _getOptionState(optionId) == LibOption.OptionState.OPEN && !_isOptionExpired(option);
+    }
+
+    function _isOptionExpired(LibOption.Option memory option) internal view returns (bool) {
+        return block.timestamp > option.expirationTimeInSeconds;
     }
 
     function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option)
@@ -76,10 +80,17 @@ contract MixinOptionState is
         optionStateById[optionId] = state;
     }
 
-    function _assertOptionStateIsOpen(bytes32 optionId) internal view {
+    function _assertOptionStateIsOpen(bytes32 optionId, LibOption.Option memory option) internal view {
         require(
-            optionStateById[optionId] == LibOption.OptionState.OPEN,
+            _isOptionOpen(optionId, option),
             "OPTION_NOT_OPEN"
+        );
+    }
+
+    function _assertOptionNotExpired(LibOption.Option memory option) internal {
+        require(
+            _isOptionExpired(option) == false,
+            "OPTION_HAS_EXPIRED"
         );
     }
 }

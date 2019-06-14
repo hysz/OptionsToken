@@ -94,12 +94,12 @@ contract OptionToken is
         return _isOptionFullyCollateralized(optionId, option);
     }
 
-    function isOpen(bytes32 optionId)
+    function isOpen(bytes32 optionId, LibOption.Option calldata option)
         external
         view
         returns (bool)
     {
-        return _isOptionOpen(optionId);
+        return _isOptionOpen(optionId, option);
     }
     
 

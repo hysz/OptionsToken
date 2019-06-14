@@ -37,6 +37,7 @@ contract MixinOptionMechanics is
     {
         // sanity checks
         _assertOptionIdMatchesOption(optionId, option);
+        _assertOptionStateIsOpen(optionId, option);
 
         // check that we won't deposit too much
         require(
@@ -61,11 +62,11 @@ contract MixinOptionMechanics is
     {
         // sanity checks
         _assertOptionIdMatchesOption(optionId, option);
-        _assertOptionNotTethered(optionId);
+        _assertOptionStateIsOpen(optionId, option);
         _assertOptionFullyCollateralized(optionId, option);
         (bytes32 makerTokenId, bytes32 takerTokenId) = LibToken._getTokensFromOptionId(optionId);
         _assertTokenOwner(takerTokenId, msg.sender);
-        _assertOptionStateIsOpen(optionId);
+        _assertOptionNotTethered(optionId);
 
         // perform transfers
         _transferAsset(
@@ -91,7 +92,8 @@ contract MixinOptionMechanics is
         internal
     {
         // sanity checks
-        _assertOptionStateIsOpen(optionId);
+        _assertOptionIdMatchesOption(optionId, option);
+        _assertOptionStateIsOpen(optionId, option);
         _assertHoldsBothTokens(optionId, msg.sender);
 
         // return underlying asset to holder
