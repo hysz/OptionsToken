@@ -41,6 +41,14 @@ contract MixinOptionState is
         return optionStateById[optionId];
     }
 
+    function _isOptionOpen(bytes32 optionId)
+        internal
+        view
+        returns (bool)
+    {
+        return _getOptionState(optionId) == LibOption.OptionState.OPEN;
+    }
+
     function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option)
         internal
         view

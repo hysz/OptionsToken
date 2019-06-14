@@ -88,11 +88,19 @@ contract OptionToken is
 
     function isFullyCollateralized(bytes32 optionId, LibOption.Option calldata option)
         external
+        view
         returns (bool)
     {
         return _isOptionFullyCollateralized(optionId, option);
     }
 
+    function isOpen(bytes32 optionId)
+        external
+        view
+        returns (bool)
+    {
+        return _isOptionOpen(optionId);
+    }
     
 
     ///// MARGIN API - Defined in ./core/MixinMargin.sol /////

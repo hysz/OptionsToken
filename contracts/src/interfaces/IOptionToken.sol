@@ -49,6 +49,12 @@ interface IOptionToken /* is IERC721 */
 
     function isFullyCollateralized(bytes32 optionId, LibOption.Option calldata option)
         external
+        view
+        returns (bool);
+
+    function isOpen(bytes32 optionId)
+        external
+        view
         returns (bool);
 
     ///// ERC721 API - Defined in ./core/ERC721.sol /////
