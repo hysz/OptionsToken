@@ -42,7 +42,7 @@ contract MixinOptionState is
     }
 
     function _assignOptionToId(bytes32 optionId, LibOption.Option memory option) internal {
-        bytes32 optionHash = LibOption._getOptionHash(option);
+        bytes32 optionHash = LibOption._hashOption(option);
         optionHashById[optionId] = optionHash;
     }
 
