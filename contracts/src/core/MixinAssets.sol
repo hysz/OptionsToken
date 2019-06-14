@@ -6,52 +6,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND (express or implied).
 
 pragma solidity ^0.5.9;
-
 pragma experimental ABIEncoderV2;
 
+import "../libs/LibAsset.sol";
 
-contract MixinBalances {
-    
-    mapping (address => uint256) private ethBalanceByOwner;
-    mapping (address => uint256) private usdcBalanceByOwner;
-    
-    function getEthBalance(address owner)
-        public
-        view
-        returns (uint256)
-    {
-        return ethBalanceByOwner[owner];
+
+contract MixinAssets {
+
+
+
+
+    function _depositAsset(LibAsset.AssetType assetType, address from, uint256 amount) internal {
+
     }
-    
-    function _depositEth(address owner, uint256 amount)
-        internal
-    {
-        
+
+    function _withdrawAsset(LibAsset.AssetType assetType, address to, uint256 amount) internal {
+
     }
-    
-    function _withdrawEth(address owner, uint256 amount)
-        internal
-    {
-        
-    }
-        
-    function getUsdcBalance(address owner)
-        public
-        view
-        returns (uint256)
-    {
-        return usdcBalanceByOwner[owner];
-    }
-    
-    function _depositUsdc(address owner, uint256 amount)
-        internal
-    {
-        
-    }
-    
-    function _withdrawUsdc(address owner, uint256 amount)
-        internal
-    {
-        
+
+    function _transferAsset(LibAsset.AssetType assetType, address from, address to, uint256 amount) internal {
+
     }
 }

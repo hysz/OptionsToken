@@ -10,6 +10,7 @@ pragma solidity ^0.5.9;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/IPriceOracle.sol";
+import "../libs/LibOption.sol";
 
 contract MixinState
 {
@@ -27,11 +28,14 @@ contract MixinState
     mapping (address => mapping (address => bool)) tokenOwnerOperatorsByAddress;
 
 
+    mapping (bytes32 => LibOption.OptionState) optionStateById;
+
     mapping (bytes32 => bytes32) optionHashById;
 
     mapping (bytes32 => bytes32) tetherByOptionId;
     mapping (bytes32 => uint256) collateralizationToleranceByOptionId;
     
+    IPriceOracle priceOracle;
 
     
     mapping (bytes32 => uint256) collateralByOptionId;

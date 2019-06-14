@@ -12,13 +12,15 @@ pragma experimental ABIEncoderV2;
 import "../libs/LibOption.sol";
 import "./MixinState.sol";
 import "./MixinTokenState.sol";
-import "./MixinTether.sol";
+import "./MixinOptionState.sol";
+import "./MixinAssets.sol";
 
 
-contract MixinOptions is
+contract MixinOptionMechanics is
     MixinState,
     MixinTokenState,
-    MixinTether
+    MixinOptionState,
+    MixinAssets
 {
 
     ///// OPTION MECHANICS /////
@@ -34,9 +36,13 @@ contract MixinOptions is
         _assertOptionIdMatchesOption(optionId, option);
 
         // 
-        uint256 maxAmountAllowed = _computeAmountToBeFullyCollateralized();
+        uint256 maxAmountAllowed = _computeAmountToBeFullyCollateralized(optionId, option);
         uint256 amountToDeposit = amount <= maxAmountAllowed ? amount : maxAmountAllowed;
-        _depositAsset(option.makerAsset, amountToDeposit, msg.sender);
+        _depositAsset(
+            option.makerAsset,
+            msg.sender,
+            amountToDeposit
+        );
     }
 
     function _exerciseOption(
@@ -49,24 +55,51 @@ contract MixinOptions is
         _assertOptionIdMatchesOption(optionId, option);
         _assertOptionNotTethered(optionId);
         _assertOptionFullyCollateralized(optionId, option);
-        (bytes32 makerTokenId, bytes32 takerTokenId) = _getTokensFromOptionId(optionId);
+        (bytes32 makerTokenId, bytes32 takerTokenId) = LibToken._getTokensFromOptionId(optionId);
         _assertTokenOwner(takerTokenId, msg.sender);
-        _assertOptionIsOpen(optionId);
+        _assertOptionStateIsOpen(optionId);
 
         // perform transfers
-        transferFrom(ownerByTokenId[takerTokenId], ownerByTokenId[makerTokenId], option.takerAsset, option.takerAmount);
-        transferTo(ownerByTokenId[takerTokenId], option.makerAsset, option.makerAmount);
+        _transferAsset(
+            option.takerAsset,              // asset
+            ownerByTokenId[takerTokenId],   // from
+            ownerByTokenId[makerTokenId],   // to
+            option.takerAmount              // amount
+        );
+        _withdrawAsset(
+            option.makerAsset,              // asset
+            ownerByTokenId[takerTokenId],   // to
+            option.makerAmount              // amount
+        );
 
         // update option state
-        _setOptionStateToExercised(optionId);
+        _setOptionState(optionId, LibOption.OptionState.EXERCISED);
+    }
+
+    function _cancelOption(bytes32 optionId, LibOption.Option memory option)
+        internal
+    {
+        // sanity checks
+        _assertOptionStateIsOpen(optionId);
+        _assertHoldsBothTokens(optionId, msg.sender);
+
+        // return underlying asset to holder
+        _withdrawAsset(
+            option.makerAsset,
+            msg.sender,
+            option.makerAmount
+        );
+
+        // update state
+        _setOptionState(optionId, LibOption.OptionState.CANCELLED);
     }
 
     // when tethered the options cannot be exercised
     function _tether(bytes32 leftOptionId, bytes32 rightOptionId)
         internal
     {
-        _assertOptionOwner(leftOptionId, msg.sender);
-        _assertOptionOwner(rightOptionId, msg.sender);
+        _assertHoldsBothTokens(leftOptionId, msg.sender);
+        _assertHoldsBothTokens(rightOptionId, msg.sender);
         _assertOptionNotTethered(leftOptionId);
         _assertOptionNotTethered(rightOptionId);
 
@@ -95,26 +128,5 @@ contract MixinOptions is
             tetherByOptionId[optionId] == 0,
             "OPTION_IS_TETHERED"
         );
-    }
-
-    
-
-    function _computeAmountToBeFullyCollateralized(bytes32 optionId, LibOption.Option memory option)
-        internal
-        pure
-    {
-        return option.makerAmount - collateralByOptionId[optionId];
-    }
-
-    ///// CONVENIENCE FUNCTIONS FOR MANAGING & QUERYING STATE /////
-
-    function _getOptionState(bytes32 optionId) internal pure {
-        return optionStateById[optionId];
-    }
-
-    ///// ASSERTIONS /////
-
-    function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option) internal pure {
-
     }
 }

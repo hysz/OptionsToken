@@ -11,21 +11,15 @@ pragma experimental ABIEncoderV2;
 
 
 import "./libs/LibOption.sol";
-
-
+import "./interfaces/IPriceOracle.sol";
 import "./core/MixinState.sol";
+import "./core/MixinOptionMechanics.sol";
 import "./core/MixinTokenMechanics.sol";
 import "./core/MixinERC721.sol";
 
 contract OptionToken is
     MixinState,
-    /*
-    MixinBalances,
-    MixinAssets,
-    */
-    //MixinOptions,
-    /*
-    MixinTether,*/
+    MixinOptionMechanics,
     MixinTokenMechanics,
     MixinERC721
 {
@@ -49,13 +43,14 @@ contract OptionToken is
         return _mint(option, msg.sender);
     }
 
-    function burn(
+    function cancelAndBurn(
         bytes32 optionId,
         LibOption.Option calldata option
     )
         external
     {
-        _burn(optionId, option);
+        _cancelOption(optionId, option);
+        _burn(optionId);
     }
 
 /*
