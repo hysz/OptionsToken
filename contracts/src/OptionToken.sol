@@ -17,6 +17,7 @@ import "./core/MixinOptionMechanics.sol";
 import "./core/MixinTokenMechanics.sol";
 import "./core/MixinERC721.sol";
 import "./core/MixinMargin.sol";
+import "./core/MixinTether.sol";
 
 contract OptionToken is
     IOptionToken,
@@ -24,7 +25,8 @@ contract OptionToken is
     MixinOptionMechanics,
     MixinTokenMechanics,
     MixinERC721,
-    MixinMargin
+    MixinMargin,
+    MixinTether
 {
 
     constructor(
@@ -39,7 +41,6 @@ contract OptionToken is
         usdcToken = IERC20(_usdcToken);
         tokenIdNonce = 1;
     }
-
 
     ///// OPTIONS API - Defined in ./core/MixinOptions.sol /////
 
@@ -112,18 +113,10 @@ contract OptionToken is
         _setMarginTolerance(nakedOptionId, tolerance);
     }
 
-
-    function getMarginTolerance(bytes32 nakedOptionId)
-        external
-        returns (uint8)
-    {
-        
-    }
-
     function marginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
         external
     {
-
+        _marginCall(nakedOptionId, option);
     }
 
     function canMarginCall(bytes32 nakedOptionId, LibOption.Option calldata option)
@@ -134,14 +127,17 @@ contract OptionToken is
         return _canMarginCall(nakedOptionId, option);
     }
 
-/*
-
     ///// TETHERING API - Defined in ./core/MixinTether.sol /////
 
-    function tether(bytes32 leftOptionId, bytes32 rightOptionId)
+    function tether(
+        bytes32 leftOptionId,
+        LibOption.Option calldata leftOption,
+        bytes32 rightOptionId,
+        LibOption.Option calldata rightOption
+    )
         external
     {
-        _tether(leftOptionId, rightOptionId);
+        _tether(leftOptionId, leftOption, rightOptionId, rightOption);
     }
 
     function untether(
@@ -154,24 +150,6 @@ contract OptionToken is
     {
         _untether(leftOptionId, leftOption, rightOptionId, rightOption);
     }
-
-    function canUntether(
-        bytes32 leftOptionId,
-        LibOption.Option calldata leftOption,
-        bytes32 rightOptionId,
-        LibOption.Option calldata rightOption
-    )
-        external
-        returns (bool)
-    {
-        //return _canUntether(leftOptionId, leftOption, rightOptionId, rightOption);
-    }
-    */
-
-    
-    ///// TOKEN API - Defined in ./core/MixinToken.sol /////
-
-    
 
     ///// ERC721 API - Defined in ./core/ERC721.sol /////
 

@@ -122,11 +122,26 @@ contract MixinOptionState is
         );
     }
 
+    function _assertOptionsAreTethered(bytes32 leftOptionId, bytes32 rightOptionId) internal view {
+        require(
+            tetherByOptionId[leftOptionId] == rightOptionId && tetherByOptionId[rightOptionId] == leftOptionId,
+            "OPTIONS_ARE_NOT_TETHERED"
+        );
+    }
+
     function _assertOptionIsPut(LibOption.Option memory option) internal pure {
         require(
             option.optionType == LibOption.OptionType.AMERICAN_PUT ||
             option.optionType == LibOption.OptionType.EUROPEAN_PUT,
             "OPTION_MUST_BE_PUT"
+        );
+    }
+
+    function _assertOptionIsCall(LibOption.Option memory option) internal pure {
+        require(
+            option.optionType == LibOption.OptionType.AMERICAN_CALL ||
+            option.optionType == LibOption.OptionType.EUROPEAN_CALL,
+            "OPTION_MUST_BE_CALL"
         );
     }
 }

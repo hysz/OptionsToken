@@ -106,31 +106,4 @@ contract MixinOptionMechanics is
         // update state
         _setOptionState(optionId, LibOption.OptionState.CANCELLED);
     }
-
-    // when tethered the options cannot be exercised
-    function _tether(bytes32 leftOptionId, bytes32 rightOptionId)
-        internal
-    {
-        _assertHoldsBothTokens(leftOptionId, msg.sender);
-        _assertHoldsBothTokens(rightOptionId, msg.sender);
-        _assertOptionNotTethered(leftOptionId);
-        _assertOptionNotTethered(rightOptionId);
-
-        tetherByOptionId[leftOptionId] = rightOptionId;
-        tetherByOptionId[rightOptionId] = leftOptionId;
-    }
-
-     // can untether in two cases:
-    // 1. Both are fully collateralized
-    // 2. The options are expired
-    function _untether(
-        bytes32 leftOptionId,
-        LibOption.Option memory leftOption,
-        bytes32 rightOptionId,
-        LibOption.Option memory rightOption
-    )
-        internal
-    {
-    
-    }
 }

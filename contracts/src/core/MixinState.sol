@@ -15,10 +15,6 @@ import "../libs/LibOption.sol";
 
 contract MixinState
 {
-
-    // For querying ETH/USD price
-    
-
     // Token
     uint128 tokenIdNonce;
     mapping (bytes32 => address) ownerByTokenId;
@@ -40,8 +36,5 @@ contract MixinState
     IERC20 wethToken;
     IERC20 usdcToken;
 
-    
     mapping (bytes32 => uint256) collateralByOptionId;
-    mapping (bytes32 => bool) isCancelledByOptionHash;
-    mapping (bytes32 => address) takerByOptionHash;
 }
