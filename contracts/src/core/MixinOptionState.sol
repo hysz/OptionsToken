@@ -61,6 +61,10 @@ contract MixinOptionState is
         return block.timestamp > option.expirationTimeInSeconds;
     }
 
+    function _isOptionTethered(bytes32 optionId) internal view returns (bool) {
+        return tetherByOptionId[optionId] != 0;
+    }
+
     function _assertOptionIdMatchesOption(bytes32 optionId, LibOption.Option memory option)
         internal
         view
@@ -95,7 +99,7 @@ contract MixinOptionState is
         );
     }
 
-    function _assertValidOption(LibOption.Option memory option) internal {
+    function _assertValidOption(LibOption.Option memory option) internal pure {
         require(
             option.makerAsset != option.takerAsset,
             "ASSETS_MUST_BE_DIFFERENT"
@@ -115,6 +119,14 @@ contract MixinOptionState is
         require(
             tetherByOptionId[optionId] == 0,
             "OPTION_IS_TETHERED"
+        );
+    }
+
+    function _assertOptionIsPut(LibOption.Option memory option) internal pure {
+        require(
+            option.optionType == LibOption.OptionType.AMERICAN_PUT ||
+            option.optionType == LibOption.OptionType.EUROPEAN_PUT,
+            "OPTION_MUST_BE_PUT"
         );
     }
 }

@@ -11,6 +11,7 @@ pragma experimental ABIEncoderV2;
 import "../libs/LibOption.sol";
 import "../libs/LibToken.sol";
 import "../libs/LibAsset.sol";
+import "../libs/LibSafeMath.sol";
 import "./MixinState.sol";
 import "./MixinTokenState.sol";
 import "./MixinOptionState.sol";
@@ -24,11 +25,17 @@ contract MixinMargin is
     MixinAssets
 {
 
+    using LibSafeMath for uint256;
+
     function _setMarginTolerance(bytes32 optionId, uint256 tolerance)
         internal
     {
         _assertHoldsBothTokens(optionId, msg.sender);
         _assertOptionNotTethered(optionId);
+        require(
+            tolerance >= 0 && tolerance <= 100,
+            "TOLERANCE_MUST_BE_PERCENTAGE"
+        );
         marginToleranceByOptionId[optionId] = tolerance;
     }
 
@@ -59,13 +66,23 @@ contract MixinMargin is
         returns (bool)
     {
         _assertOptionIdMatchesOption(optionId, option);
-        _assertOptionStateIsOpen(optionId, option);
+        _assertOptionIsPut(option);
+        require(
+            _isOptionOpen(optionId, option) || (_isOptionExpired(option) && _isOptionTethered(optionId)),
+            "OPTION_MUST_BE_OPEN__OR__EXPIRED_AND_TETHERED"
+        );
 
         uint256 strikePrice = LibOption._computeStrikePrice(option);
         uint256 spotPrice = (option.takerAsset == LibAsset.AssetType.USDC) ? _getEthSpotPriceInUsd() : _getUsdSpotPriceInEth();
+        
+        uint256 opposingIntrinsicValue = spotPrice > strikePrice ? spotPrice - strikePrice : 0;
+        uint256 marginTolerance = marginToleranceByOptionId[optionId];
+        uint256 marginThreshold = (opposingIntrinsicValue._mul(marginTolerance))._div(100);
+
+        uint256 marginCallPrice = strikePrice._add(marginThreshold);
         uint256 collateral = _getCollateral(optionId);
 
-        if (strikePrice > spotPrice && collateral < strikePrice - spotPrice) {
+        if (marginCallPrice > spotPrice && collateral < marginCallPrice - spotPrice) {
             return true;
         }
         return false;
