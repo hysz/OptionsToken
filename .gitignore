@@ -1,0 +1,7 @@
+node_modules*
+lib*
+generated*
+yarn-error.log
+yarn.lock
+ganache.log
+.*swp
